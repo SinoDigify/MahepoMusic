@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# PyInstaller
+build/
+dist/
+
+# PyArmor
+obfuscated/
+.pyarmor/
+
+# Chrome Bundle
+chrome_bundle/
+
+# Download files
+download/
+*.mp3
+*.lrc
+
+# Runtime files
+todo-download.txt
+download-success.txt
+download-err.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# legacyCode
+legacyCode/
+.claude/

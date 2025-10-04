@@ -1,0 +1,52 @@
+====================================
+音乐下载器 V2 - 使用说明
+====================================
+
+【功能介绍】
+下载音乐mp3文件和lrc歌词文件。
+
+【使用方法】
+
+1. 创建待下载列表
+   编辑 todo-download.txt 文件，每行一首歌曲，例如：
+
+   Blinding Lights - The Weeknd
+   Shape of You - Ed Sheeran
+   Levitating - Dua Lipa
+
+2. 运行程序
+   - 开发模式：python music_downloader_v2.py
+   - 打包后：双击 music_downloader.exe
+
+3. 查看下载结果
+   - 下载文件：download/ 文件夹
+   - 成功记录：download-success.txt
+   - 错误记录：download-err.txt
+
+【注意事项】
+
+- 程序会自动创建 download 文件夹
+- 下载完成后 todo-download.txt 会被清空
+- 如需再次下载，重新编辑 todo-download.txt 即可
+- 程序需要网络连接才能正常工作
+- 本程序已内置 Chrome 驱动，无需单独安装
+
+【文件说明】
+
+music_downloader.exe    - 主程序
+todo-download.txt       - 待下载歌曲列表（首次运行自动创建）
+download/               - 下载文件保存目录（自动创建）
+download-success.txt    - 下载成功记录
+download-err.txt        - 下载失败记录
+README.txt              - 本说明文件
+
+【示例 todo-download.txt 格式】
+
+All of Me - John Legend
+Perfect - Ed Sheeran
+Someone Like You - Adele
+
+每行一首歌曲，建议格式：歌名 - 歌手
+程序会自动搜索并下载最匹配的结果。
+
+====================================

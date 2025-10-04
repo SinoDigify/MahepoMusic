@@ -1,0 +1,342 @@
+====================================
+音乐下载器 - 故障排除
+====================================
+
+【常见问题及解决方案】
+
+1. 初始化失败
+
+问题：运行init.bat时出错
+原因：
+- Python未安装或不在PATH中
+- 网络连接问题
+- 磁盘空间不足
+
+解决方案：
+```
+# 检查Python是否安装
+python --version
+
+# 如果未安装，从官网下载：https://www.python.org/downloads/
+# 安装时勾选"Add Python to PATH"
+
+# 检查网络连接
+ping storage.googleapis.com
+
+# 检查磁盘空间（至少需要500MB）
+```
+
+2. pip安装依赖失败
+
+问题：pip install命令报错
+原因：
+- pip版本过旧
+- 网络超时
+- 权限不足
+
+解决方案：
+```
+# 升级pip
+python -m pip install --upgrade pip
+
+# 使用国内镜像源
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pyperclip selenium pyarmor pyinstaller
+
+# 以管理员权限运行
+```
+
+3. Chrome下载失败
+
+问题：init.bat下载Chrome时卡住或失败
+原因：
+- Google服务器访问受限
+- 网络不稳定
+- 防火墙拦截
+
+解决方案：
+方案1：使用代理
+```
+# 设置代理（如果有）
+set HTTP_PROXY=http://proxy.example.com:8080
+set HTTPS_PROXY=http://proxy.example.com:8080
+init.bat
+```
+
+方案2：手动下载
+1. 访问以下链接手动下载：
+   Chrome: https://storage.googleapis.com/chrome-for-testing-public/141.0.7390.54/win64/chrome-win64.zip
+   ChromeDriver: https://storage.googleapis.com/chrome-for-testing-public/141.0.7390.54/win64/chromedriver-win64.zip
+
+2. 解压到chrome_bundle目录：
+   chrome_bundle/
+   ├─ chrome-win64/
+   └─ chromedriver-win64/
+
+4. 运行时找不到Chrome
+
+问题：程序报错"未找到Chrome"
+原因：
+- chrome_bundle目录不存在或不完整
+- 文件路径错误
+
+解决方案：
+```
+# 检查目录结构
+dir chrome_bundle\chrome-win64\chrome.exe
+dir chrome_bundle\chromedriver-win64\chromedriver.exe
+
+# 如果文件不存在，重新运行init.bat
+# 或手动下载并解压
+```
+
+5. 下载卡住不动
+
+问题：程序运行后一直显示"等待搜索结果加载"
+原因：
+- 网络超时
+- MP3Juice服务器响应慢
+- 页面结构变化
+
+解决方案：
+```
+# 检查网络连接
+ping mp3juice.co
+
+# 增加等待时间（修改代码）
+# 在music_downloader_v2.py中找到：
+WebDriverWait(self.driver, 20)  # 改为 30 或更大
+
+# 临时关闭headless模式查看问题
+# 注释掉：chrome_options.add_argument("--headless")
+```
+
+6. 下载的文件为空或损坏
+
+问题：MP3文件大小为0或无法播放
+原因：
+- 下载未完成就被重命名
+- 网络中断
+- 下载源问题
+
+解决方案：
+```
+# 删除损坏的文件
+del download\*.mp3
+
+# 增加下载等待时间（修改代码）
+max_wait = 30  # 改为 60 或更大
+
+# 重新添加到todo-download.txt重新下载
+```
+
+7. 歌词下载失败
+
+问题：音乐下载成功但没有歌词
+原因：
+- LRCLib没有该歌曲歌词
+- 歌曲名拼写错误
+- 网络问题
+
+解决方案：
+```
+# 检查download-err.txt查看具体错误
+type download-err.txt
+
+# 尝试修改歌曲名格式
+# 原：Shape of You
+# 改：Shape of You - Ed Sheeran
+
+# 手动访问LRCLib搜索确认是否有歌词
+# https://lrclib.net/
+```
+
+8. PyArmor混淆失败
+
+问题：运行pyarmor命令报错
+原因：
+- PyArmor trial版本限制
+- Python版本不兼容
+- 代码语法错误
+
+解决方案：
+```
+# 检查PyArmor版本
+pyarmor --version
+
+# 重新安装PyArmor
+pip uninstall pyarmor
+pip install pyarmor
+
+# 检查代码语法
+python -m py_compile music_downloader_v2.py
+
+# 如果是trial限制，考虑购买正式版或使用其他混淆工具
+```
+
+9. PyInstaller打包失败
+
+问题：打包过程中报错
+原因：
+- 缺少隐式导入
+- spec文件配置错误
+- 资源文件路径错误
+
+解决方案：
+```
+# 清理之前的构建
+rmdir /s /q build dist
+del *.spec
+
+# 重新生成spec文件
+pyi-makespec --onefile music_downloader_v2.py
+
+# 手动编辑spec文件，添加datas和hiddenimports
+# 参考项目中的music_downloader.spec
+
+# 重新打包
+pyinstaller music_downloader.spec
+```
+
+10. exe运行后立即退出
+
+问题：双击exe后闪退
+原因：
+- Python运行时错误
+- 缺少依赖文件
+- 权限问题
+
+解决方案：
+```
+# 在命令行中运行exe查看错误信息
+cd dist
+music_downloader.exe
+
+# 检查是否缺少DLL
+# 安装VC++运行库：https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+# 以管理员权限运行
+```
+
+11. 下载目录权限问题
+
+问题：无法创建download文件夹
+原因：
+- 当前目录没有写权限
+- 被杀毒软件拦截
+
+解决方案：
+```
+# 检查当前目录权限
+# 右键文件夹 -> 属性 -> 安全
+
+# 以管理员权限运行
+
+# 添加杀毒软件白名单
+# 将music_downloader.exe添加到杀毒软件信任列表
+```
+
+12. todo-download.txt编码问题
+
+问题：中文歌名显示乱码
+原因：
+- 文件编码不是UTF-8
+- 系统默认编码问题
+
+解决方案：
+```
+# 使用支持UTF-8的编辑器
+# 推荐：Notepad++、VS Code
+
+# 在Notepad++中：
+# 格式 -> 转为UTF-8编码（无BOM）
+
+# 在VS Code中：
+# 右下角点击编码 -> 选择"UTF-8"
+```
+
+【日志分析】
+
+下载成功日志格式：
+```
+2025-10-05 10:30:45 - Shape of You - Ed Sheeran - MP3:成功, 歌词:成功
+```
+
+下载失败日志格式：
+```
+2025-10-05 10:31:20 - Unknown Song - MP3:失败, 歌词:失败
+```
+
+部分成功日志：
+```
+2025-10-05 10:32:15 - Blinding Lights - MP3:成功, 歌词:失败
+```
+
+【高级调试】
+
+1. 启用Chrome DevTools
+```python
+# 在setup_driver()中添加
+chrome_options.add_argument("--auto-open-devtools-for-tabs")
+```
+
+2. 保存页面截图
+```python
+# 在关键步骤添加
+self.driver.save_screenshot("debug.png")
+```
+
+3. 打印页面源码
+```python
+# 调试时查看页面内容
+print(self.driver.page_source)
+```
+
+4. 输出详细日志
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+【性能问题】
+
+1. 下载速度慢
+- 正常现象，每首歌需要30-90秒
+- 取决于网络和服务器响应
+- 可以考虑使用代理或VPN
+
+2. 内存占用高
+- Chrome驱动会占用较多内存（约200-300MB）
+- 下载大量歌曲时建议分批处理
+- 定期重启程序释放内存
+
+3. CPU占用高
+- headless Chrome仍需要CPU资源
+- 可以降低Chrome优先级
+- 避免同时运行其他浏览器
+
+【获取帮助】
+
+如果以上方法都无法解决问题：
+
+1. 收集错误信息
+   - 复制完整的错误提示
+   - 截图报错界面
+   - 查看download-err.txt日志
+
+2. 检查环境信息
+   ```
+   python --version
+   pip list
+   ```
+
+3. 提供复现步骤
+   - 详细描述操作流程
+   - 提供todo-download.txt内容
+   - 说明预期结果和实际结果
+
+4. 提交Issue
+   - 在项目GitHub页面提交Issue
+   - 附上错误信息和环境信息
+   - 标注操作系统版本
+
+====================================

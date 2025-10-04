@@ -1,0 +1,273 @@
+====================================
+音乐下载器 - 开发文档
+====================================
+
+【项目架构】
+
+1. 核心组件
+
+MusicDownloader类
+- 负责整体下载流程协调
+- 管理Chrome WebDriver
+- 处理文件读写和重命名
+
+主要方法：
+- setup_driver() - 初始化Chrome驱动
+- download_mp3_from_mp3juice() - 从MP3Juice下载音乐
+- download_lrc_from_lrclib() - 从LRCLib下载歌词
+- process_downloads() - 批量处理下载任务
+
+2. 工具函数
+
+get_exe_dir()
+- 获取exe所在目录
+- 兼容开发模式和打包模式
+
+extract_bundled_chrome()
+- 解压内置的Chrome浏览器
+- 仅在首次运行或Chrome不存在时执行
+
+extract_usage_instructions()
+- 每次运行时提取使用说明.txt
+- 覆盖已存在的文件
+
+sanitize_filename()
+- 清理文件名中的非法字符
+- 确保Windows文件系统兼容性
+
+【技术栈】
+
+核心依赖：
+- selenium 4.x - Web自动化框架
+  用于控制Chrome浏览器进行下载操作
+
+- pyperclip - 剪贴板操作
+  用于获取LRCLib复制的歌词内容（备用方案）
+
+- Chrome for Testing - 独立Chrome浏览器
+  避免依赖用户系统Chrome版本
+  版本：141.0.7390.54
+
+- ChromeDriver - Chrome WebDriver
+  与Chrome for Testing配套使用
+  版本：141.0.7390.54
+
+开发工具：
+- pyarmor - Python代码混淆
+  保护源代码不被反编译
+  版本：9.1.9 (trial)
+
+- pyinstaller - Python打包工具
+  将Python脚本打包为exe
+  版本：6.16.0
+
+【代码结构】
+
+```
+music_downloader_v2.py
+├─ 工具函数
+│  ├─ get_exe_dir()               # 获取exe目录
+│  ├─ extract_usage_instructions() # 提取使用说明
+│  └─ extract_bundled_chrome()    # 解压Chrome
+│
+├─ MusicDownloader类
+│  ├─ __init__()                  # 初始化配置
+│  ├─ setup_driver()              # 设置Chrome驱动
+│  ├─ sanitize_filename()         # 文件名清理
+│  ├─ get_latest_mp3_file()       # 获取最新MP3
+│  ├─ download_mp3_from_mp3juice() # 下载音乐
+│  ├─ download_lrc_from_lrclib()  # 下载歌词
+│  ├─ save_lrc_file()             # 保存歌词文件
+│  ├─ read_todo_list()            # 读取待下载列表
+│  ├─ append_to_file()            # 追加日志
+│  ├─ update_todo_list()          # 更新待下载列表
+│  └─ process_downloads()         # 处理下载任务
+│
+└─ main()                         # 主函数
+```
+
+【关键实现】
+
+1. Chrome驱动设置
+
+使用headless模式运行Chrome：
+```python
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
+```
+
+自定义下载目录：
+```python
+prefs = {
+    "download.default_directory": self.download_dir,
+    "download.prompt_for_download": False,
+}
+chrome_options.add_experimental_option("prefs", prefs)
+```
+
+2. MP3Juice下载流程
+
+步骤1：访问MP3Juice首页
+步骤2：在搜索框输入歌曲名
+步骤3：点击搜索按钮
+步骤4：等待搜索结果加载
+步骤5：点击第一个"MP3 Download"按钮
+步骤6：等待转换完成（最长90秒）
+步骤7：点击"Download"链接下载
+步骤8：监控下载目录，检测新文件
+步骤9：重命名文件为标准名称
+
+关键代码：
+```python
+# 使用JavaScript点击，避免元素被遮挡
+self.driver.execute_script("arguments[0].click();", download_buttons[0])
+
+# 智能等待，一旦出现Download按钮就继续
+download_link = WebDriverWait(self.driver, 90).until(
+    EC.presence_of_element_located((By.XPATH, '//a[text()="Download"]'))
+)
+```
+
+3. LRCLib歌词下载流程
+
+步骤1：构造搜索URL
+步骤2：访问搜索结果页面
+步骤3：使用JavaScript查找并点击第一个结果
+步骤4：等待歌词弹窗加载
+步骤5：使用JavaScript直接从DOM读取歌词内容
+步骤6：保存为LRC文件
+
+关键改进：
+- 不使用复制按钮（避免浏览器权限弹窗）
+- 直接从页面元素提取歌词文本
+- 查找包含 [00: 格式的元素
+
+4. 文件名处理
+
+Windows文件名非法字符：
+```python
+name = re.sub(r'[<>:"/\\|?*]', '_', name)
+```
+
+防止文件名过长：
+```python
+if len(name) > 200:
+    name = name[:200]
+```
+
+5. 打包资源管理
+
+使用sys.frozen判断运行模式：
+```python
+if getattr(sys, 'frozen', False):
+    # 打包模式，使用临时目录
+    bundle_dir = sys._MEIPASS
+else:
+    # 开发模式，使用当前目录
+    bundle_dir = exe_dir
+```
+
+【打包流程】
+
+1. 代码混淆
+```bash
+pyarmor gen -O obfuscated music_downloader_v2.py
+```
+
+生成obfuscated目录，包含：
+- music_downloader_v2.py（混淆后）
+- pyarmor_runtime_000000/（运行时库）
+
+2. 创建spec文件
+
+关键配置：
+```python
+a = Analysis(
+    ['obfuscated\\music_downloader_v2.py'],  # 混淆后的代码
+    datas=[
+        ('obfuscated\\pyarmor_runtime_000000', 'pyarmor_runtime_000000'),
+        ('使用说明.txt', '.'),
+        ('chrome_bundle\\chrome-win64', 'chrome-win64'),
+        ('chrome_bundle\\chromedriver-win64', 'chromedriver-win64')
+    ],
+    hiddenimports=[
+        'pyperclip', 'selenium',
+        'selenium.webdriver.chrome.options',
+        # ... 其他隐式导入
+    ],
+)
+```
+
+3. 打包为exe
+```bash
+pyinstaller music_downloader.spec
+```
+
+输出：
+- dist/music_downloader.exe（单文件exe，约180MB）
+
+【扩展开发】
+
+添加新的下载源：
+1. 在MusicDownloader类中添加新方法
+2. 实现download_xxx_from_source()方法
+3. 在process_downloads()中调用
+
+支持更多文件格式：
+1. 修改文件检测逻辑（目前仅支持.mp3）
+2. 添加格式转换功能
+
+自定义下载策略：
+1. 修改搜索关键词构造逻辑
+2. 调整等待时间参数
+3. 添加重试机制
+
+【调试技巧】
+
+启用Chrome可见模式：
+```python
+# 注释掉headless参数
+# chrome_options.add_argument("--headless")
+```
+
+查看详细日志：
+```python
+import traceback
+traceback.print_exc()  # 已在异常处理中添加
+```
+
+测试单个功能：
+```python
+# 在main()中单独调用
+downloader.download_mp3_from_mp3juice("测试歌曲")
+```
+
+【性能优化】
+
+1. 减少等待时间
+- 调整WebDriverWait的timeout参数
+- 使用presence_of_element而非visibility_of_element
+
+2. 并发下载
+- 可以修改为多线程/多进程
+- 注意Chrome实例资源占用
+
+3. 缓存机制
+- 已下载歌曲记录在download-success.txt
+- 可以添加MD5校验避免重复下载
+
+【已知限制】
+
+1. 依赖外部服务
+- MP3Juice和LRCLib可能不稳定
+- 服务更新可能导致选择器失效
+
+2. 下载质量
+- MP3质量由源决定
+- 歌词可能不完全匹配
+
+3. 文件大小
+- 打包后exe约180MB（包含Chrome）
+- 可以考虑外部下载Chrome减小体积
+
+====================================
