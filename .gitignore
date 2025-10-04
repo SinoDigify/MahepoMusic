@@ -22,7 +22,6 @@ download/
 *.lrc
 
 # Runtime files
-todo-download.txt
 download-success.txt
 download-err.txt
 
