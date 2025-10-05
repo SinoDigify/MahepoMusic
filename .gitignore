@@ -24,6 +24,7 @@ download/
 # Runtime files
 download-success.txt
 download-err.txt
+*.log
 
 # IDE
 .vscode/

@@ -1,6 +1,6 @@
 # 马赫坡音乐 🎵
 
-![Logo](doc/1.png)
+![Logo](doc/3.png)
 
 自动下载音乐MP3文件和LRC歌词文件的工具，带GUI音乐播放器。
 使用Selenium自动化从MP3Juice下载音乐，从LRCLib下载歌词。
@@ -51,11 +51,11 @@
 ### 主界面
 ![主界面](doc/1.png)
 
-### 播放界面
-![播放界面](doc/2.png)
+### 桌面歌词界面
+![桌面歌词界面](doc/3.png)
 
 ### 下载界面
-![下载界面](doc/3.png)
+![下载界面](doc/2.png)
 
 ## 🚀 快速开始
 
@@ -121,7 +121,6 @@ MahepoMusic/
 ├── README.md                     # 本文档
 ├── README.txt                    # 文本版说明
 ├── 使用说明.txt                  # 用户使用说明
-├── 功能清单.md                   # 已实现和规划功能清单
 ├── init.bat                      # 初始化脚本
 ├── .gitignore                    # Git忽略规则
 ├── doc/                          # 文档和截图
@@ -136,15 +135,15 @@ MahepoMusic/
     └── chromedriver-win64/       # ChromeDriver
 
 运行时生成：
-├── download/                     # 下载的音乐和歌词
-├── todo-download.txt             # 待下载歌曲列表
-├── download-success.txt          # 下载成功记录
-├── download-err.txt              # 下载失败记录
-├── player_config.txt             # 播放器配置
 ├── build/                        # PyInstaller构建目录
 └── dist/                         # 打包输出
     └── 马赫坡音乐/
-        └── 马赫坡音乐.exe        # 可执行文件
+        └── 马赫坡音乐.exe          # 可执行文件
+        └── download/               # 下载的音乐和歌词
+        └── todo-download.txt           # 待下载歌曲列表
+        └── download-success.txt        # 下载成功记录
+        └── download-err.txt            # 下载失败记录
+        └── player_config.txt             # 播放器配置
 ```
 
 ## 🛠️ 技术栈
