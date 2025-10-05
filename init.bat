@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ====================================
-echo 音乐下载器初始化脚本
+echo 马赫坡音乐 - 初始化脚本
 echo ====================================
 echo.
 
@@ -14,7 +14,7 @@ if errorlevel 1 (
 )
 
 echo [1/4] 安装Python依赖...
-pip install pyperclip selenium pyarmor pyinstaller
+pip install pyperclip selenium pyarmor pyinstaller mutagen pygame
 
 echo.
 echo [2/4] 下载Chrome for Testing...
@@ -67,10 +67,11 @@ echo ====================================
 echo.
 echo 接下来的步骤：
 echo 1. 编辑 todo-download.txt 添加要下载的歌曲
-echo 2. 运行 python music_downloader_v2.py 开始下载
+echo 2. 运行 python music_downloader_gui.py 开始使用
 echo.
 echo 如需打包exe，运行：
-echo 1. pyarmor gen -O obfuscated music_downloader_v2.py
-echo 2. pyinstaller music_downloader.spec
+echo 1. pyarmor gen -O obfuscated music_downloader_gui.py
+echo 2. pyinstaller music_downloader_gui.spec
+echo 3. 生成的exe文件：dist\马赫坡音乐.exe
 echo.
 pause

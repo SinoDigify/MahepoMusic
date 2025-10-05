@@ -1,0 +1,2 @@
+last_song=成都
+loop_enabled=False

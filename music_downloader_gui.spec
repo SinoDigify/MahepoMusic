@@ -1,12 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+# 快速启动优化配置
+block_cipher = None
 
 a = Analysis(
-    ['obfuscated\\music_downloader_gui.py'],
+    ['music_downloader_gui.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ('obfuscated\\pyarmor_runtime_000000', 'pyarmor_runtime_000000'),
         ('使用说明.txt', '.'),
         ('chrome_bundle\\chrome-win64', 'chrome-win64'),
         ('chrome_bundle\\chromedriver-win64', 'chromedriver-win64')
@@ -15,30 +16,43 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        'matplotlib', 'numpy', 'pandas', 'scipy', 'PIL',
+        'pytest', 'setuptools', 'wheel', 'pip',
+        'pydoc', 'doctest', 'asyncio'
+    ],
     noarchive=False,
-    optimize=0,
+    optimize=2,
+    cipher=block_cipher,
 )
-pyz = PYZ(a.pure)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
-    name='music_downloader_gui',
+    exclude_binaries=True,
+    name='马赫坡音乐',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,  # 关键：不显示控制台窗口
-    disable_windowed_traceback=False,
+    strip=True,
+    upx=False,
+    console=False,
+    disable_windowed_traceback=True,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # 可以添加图标文件路径
+    icon=None,
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=True,
+    upx=False,
+    upx_exclude=[],
+    name='马赫坡音乐',
 )
